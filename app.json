@@ -1,8 +1,9 @@
 {
   "expo": {
-    "name": "alia-mobile",
+    "name": "Alía",
     "slug": "alia-mobile",
     "version": "1.0.0",
+    "scheme": "aliamobile",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
