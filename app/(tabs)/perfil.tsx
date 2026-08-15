@@ -116,11 +116,17 @@ export default function PerfilScreen() {
           <Text style={styles.botonSecundarioTexto}>Mis servicios</Text>
         </Pressable>
       )}
-
+      <Pressable
+        style={styles.botonSecundario}
+        onPress={() => router.push("/disponibilidad")}
+      >
+        <Text style={styles.botonSecundarioTexto}>Mi horario</Text>
+      </Pressable>
       <Pressable style={styles.boton} onPress={confirmarCierreSesion}>
         <Text style={styles.botonTexto}>Cerrar sesión</Text>
       </Pressable>
     </View>
+    
   );
 }
 
