@@ -7,6 +7,12 @@ import { colors } from "../../src/constants/colors";
 
 const REGEX_HORA = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
+function formatearHora(texto: string): string {
+  const soloDigitos = texto.replace(/\D/g, "").slice(0, 4);
+  if (soloDigitos.length <= 2) return soloDigitos;
+  return `${soloDigitos.slice(0, 2)}:${soloDigitos.slice(2)}`;
+}
+
 export default function AgregarDisponibilidadScreen() {
   const [diaSemana, setDiaSemana] = useState<number | null>(null);
   const [horaInicio, setHoraInicio] = useState("");
@@ -19,7 +25,7 @@ export default function AgregarDisponibilidadScreen() {
       return;
     }
     if (!REGEX_HORA.test(horaInicio) || !REGEX_HORA.test(horaFin)) {
-      Alert.alert("Formato inválido", "Usa el formato HH:MM, ej. 08:00.");
+      Alert.alert("Formato inválido", "Completa la hora en formato de 24h, ej. 0800 para las 8:00 am.");
       return;
     }
     if (horaFin <= horaInicio) {
@@ -35,9 +41,16 @@ export default function AgregarDisponibilidadScreen() {
         hora_fin: `${horaFin}:00`,
       });
       router.back();
-    } catch (err: any) {
-      Alert.alert("Error", err.message ?? "No se pudo guardar.");
-    } finally {
+   } catch (err: any) {
+     if (err.message?.includes("se superpone")) {
+       Alert.alert(
+         "Horario superpuesto",
+         "Ya tienes un bloque que se cruza con este horario. Edítalo o elimínalo primero."
+      );
+     } else {
+       Alert.alert("Error", err.message ?? "No se pudo guardar.");
+    }
+  } finally {
       setGuardando(false);
     }
   }
@@ -66,25 +79,25 @@ export default function AgregarDisponibilidadScreen() {
         ))}
       </View>
 
-      <Text style={styles.etiqueta}>Desde</Text>
+      <Text style={styles.etiqueta}>Desde (formato 24h, ej. 0800)</Text>
       <TextInput
         style={styles.input}
         placeholder="08:00"
         placeholderTextColor={colors.coolClay}
         value={horaInicio}
-        onChangeText={setHoraInicio}
-        keyboardType="numeric"
+        onChangeText={(texto) => setHoraInicio(formatearHora(texto))}
+        keyboardType="number-pad"
         maxLength={5}
       />
 
-      <Text style={styles.etiqueta}>Hasta</Text>
+      <Text style={styles.etiqueta}>Hasta (formato 24h, ej. 1700)</Text>
       <TextInput
         style={styles.input}
         placeholder="17:00"
         placeholderTextColor={colors.coolClay}
         value={horaFin}
-        onChangeText={setHoraFin}
-        keyboardType="numeric"
+        onChangeText={(texto) => setHoraFin(formatearHora(texto))}
+        keyboardType="number-pad"
         maxLength={5}
       />
 

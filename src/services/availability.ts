@@ -33,3 +33,26 @@ export async function getMiDisponibilidad(): Promise<AvailabilityBlock[]> {
   if (error) throw error;
   return data ?? [];
 }
+export async function cambiarEstadoBloque(id: string, activo: boolean) {
+  const { error } = await supabase.from("availability").update({ activo }).eq("id", id);
+  if (error) throw error;
+}
+
+export async function eliminarBloqueDisponibilidad(id: string) {
+  const { error } = await supabase.from("availability").delete().eq("id", id);
+  if (error) throw error;
+}
+export async function getDisponibilidadDeProfesional(
+  professionalId: string
+): Promise<AvailabilityBlock[]> {
+  const { data, error } = await supabase
+    .from("availability")
+    .select("id, professional_id, dia_semana, hora_inicio, hora_fin, activo")
+    .eq("professional_id", professionalId)
+    .eq("activo", true)
+    .order("dia_semana", { ascending: true })
+    .order("hora_inicio", { ascending: true });
+
+  if (error) throw error;
+  return data ?? [];
+}

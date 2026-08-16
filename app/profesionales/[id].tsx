@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { View, Text, Image, FlatList, StyleSheet, ActivityIndicator } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { View, Text, Image, FlatList, Pressable, StyleSheet, ActivityIndicator } from "react-native";
+import { router, useLocalSearchParams } from "expo-router";
 import {
   getPerfilProfesionalPublico,
   PerfilProfesionalPublico,
@@ -8,18 +8,26 @@ import {
 import { getServiciosDeProfesional } from "../../src/services/services";
 import { Service } from "../../src/types/service";
 import { colors } from "../../src/constants/colors";
+import { getDisponibilidadDeProfesional } from "../../src/services/availability";
+import { AvailabilityBlock, DIAS_SEMANA } from "../../src/types/availability";
 
 export default function PerfilProfesionalScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [perfil, setPerfil] = useState<PerfilProfesionalPublico | null>(null);
   const [servicios, setServicios] = useState<Service[]>([]);
+  const [disponibilidad, setDisponibilidad] = useState<AvailabilityBlock[]>([]);
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    Promise.all([getPerfilProfesionalPublico(id), getServiciosDeProfesional(id)])
-      .then(([perfilData, serviciosData]) => {
+    Promise.all([
+      getPerfilProfesionalPublico(id),
+      getServiciosDeProfesional(id),
+      getDisponibilidadDeProfesional(id),
+    ])
+      .then(([perfilData, serviciosData, disponibilidadData]) => {
         setPerfil(perfilData);
         setServicios(serviciosData);
+        setDisponibilidad(disponibilidadData);
       })
       .finally(() => setCargando(false));
   }, [id]);
@@ -61,6 +69,16 @@ export default function PerfilProfesionalScreen() {
             <Text style={styles.zona}>{perfil.zona_trabajo}</Text>
           )}
           {perfil.bio && <Text style={styles.bio}>{perfil.bio}</Text>}
+          {disponibilidad.length > 0 && (
+            <View style={styles.disponibilidadContainer}>
+              <Text style={styles.subtitulo}>Horario</Text>
+              {disponibilidad.map((bloque) => (
+                <Text key={bloque.id} style={styles.bloqueHorario}>
+                  {DIAS_SEMANA[bloque.dia_semana]}: {bloque.hora_inicio.slice(0, 5)} - {bloque.hora_fin.slice(0, 5)}
+                </Text>
+              ))}
+            </View>
+          )}
           <Text style={styles.subtitulo}>Servicios</Text>
         </View>
       }
@@ -76,6 +94,22 @@ export default function PerfilProfesionalScreen() {
           <Text style={styles.precio}>
             ${item.precio.toLocaleString("es-CO")}
           </Text>
+          <Pressable
+            style={styles.botonSolicitar}
+            onPress={() =>
+              router.push({
+                pathname: "/bookings/solicitar",
+                params: {
+                  serviceId: item.id,
+                  professionalId: item.professional_id,
+                  nombreServicio: item.nombre,
+                  precio: String(item.precio),
+                },
+              })
+            }
+          >
+            <Text style={styles.botonSolicitarTexto}>Solicitar</Text>
+          </Pressable>
         </View>
       )}
     />
@@ -110,7 +144,16 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 12,
   },
+  disponibilidadContainer: { alignSelf: "stretch", marginTop: 16 },
+  bloqueHorario: { color: colors.quartzite, marginTop: 4 },
   servicioNombre: { fontSize: 16, fontWeight: "600", color: colors.quartzite },
   servicioDescripcion: { color: colors.coolClay, marginTop: 4 },
   precio: { color: colors.nettleGreen, marginTop: 6, fontWeight: "600" },
+  botonSolicitar: {
+    backgroundColor: colors.lionfishRed,
+    paddingVertical: 8,
+    borderRadius: 6,
+    marginTop: 10,
+  },
+  botonSolicitarTexto: { color: "white", textAlign: "center", fontWeight: "600", fontSize: 13 },
 });
