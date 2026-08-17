@@ -11,6 +11,7 @@ import { colors } from "../../src/constants/colors";
 const ETIQUETA_ESTADO: Record<string, string> = {
   pendiente: "Pendiente",
   aceptada: "Aceptada",
+  en_progreso: "En progreso",
   rechazada: "Rechazada",
   cancelada: "Cancelada",
   completada: "Completada",
@@ -81,7 +82,7 @@ export default function MisSolicitudesEnviadasScreen() {
             </Text>
             <Text style={styles.estado}>{ETIQUETA_ESTADO[item.estado]}</Text>
 
-            {(item.estado === "pendiente" || item.estado === "aceptada") && (
+            {(item.estado === "pendiente" || item.estado === "aceptada" || item.estado === "en_progreso") && (
               <Pressable
                 style={styles.botonCancelar}
                 onPress={() => confirmarCancelar(item.id)}

@@ -5,6 +5,7 @@ import {
   getSolicitudesRecibidas,
   aceptarSolicitud,
   rechazarSolicitud,
+  iniciarServicio,
   completarSolicitud,
   SolicitudRecibida,
 } from "../../src/services/bookings";
@@ -13,6 +14,7 @@ import { colors } from "../../src/constants/colors";
 const ETIQUETA_ESTADO: Record<string, string> = {
   pendiente: "Pendiente",
   aceptada: "Aceptada",
+  en_progreso: "En progreso",
   rechazada: "Rechazada",
   cancelada: "Cancelada",
   completada: "Completada",
@@ -70,6 +72,27 @@ export default function SolicitudesRecibidasScreen() {
               cargarSolicitudes();
             } catch (err: any) {
               Alert.alert("Error", err.message ?? "No se pudo rechazar.");
+            }
+          },
+        },
+      ]
+    );
+  }
+
+  function confirmarIniciar(id: string) {
+    Alert.alert(
+      "Iniciar servicio",
+      "¿Confirmas que estás comenzando este servicio ahora?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Iniciar",
+          onPress: async () => {
+            try {
+              await iniciarServicio(id);
+              cargarSolicitudes();
+            } catch (err: any) {
+              Alert.alert("Error", err.message ?? "No se pudo iniciar.");
             }
           },
         },
@@ -147,6 +170,15 @@ export default function SolicitudesRecibidasScreen() {
 
             {item.estado === "aceptada" && (
               <Pressable
+                style={styles.botonIniciar}
+                onPress={() => confirmarIniciar(item.id)}
+              >
+                <Text style={styles.botonIniciarTexto}>Iniciar servicio</Text>
+              </Pressable>
+            )}
+
+            {item.estado === "en_progreso" && (
+              <Pressable
                 style={styles.botonCompletar}
                 onPress={() => confirmarCompletar(item.id)}
               >
@@ -213,4 +245,11 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   botonChatTexto: { color: colors.nettleGreen, textAlign: "center", fontWeight: "600" },
+  botonIniciar: {
+    backgroundColor: colors.lionfishRed,
+    paddingVertical: 8,
+    borderRadius: 6,
+    marginTop: 10,
+  },
+  botonIniciarTexto: { color: "white", textAlign: "center", fontWeight: "600" },
 });

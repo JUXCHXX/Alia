@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { View, Text, Pressable, StyleSheet, Alert, ActivityIndicator, Image } from "react-native";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback } from "react";
 import { supabase } from "../../src/services/supabase";
 import { getMiPerfil } from "../../src/services/profiles";
 import { Profile } from "../../src/types/profile";
 import { colors } from "../../src/constants/colors";
-import { useFocusEffect } from "expo-router";
-import { useCallback } from "react";
 
 export default function PerfilScreen() {
   const [perfil, setPerfil] = useState<Profile | null>(null);
@@ -83,6 +82,7 @@ export default function PerfilScreen() {
         <Text style={styles.dato}>Ciudad: {perfil.ciudad ?? "No especificada"}</Text>
         <Text style={styles.dato}>Teléfono: {perfil.telefono ?? "No especificado"}</Text>
       </View>
+
       <Pressable
         style={styles.botonSecundario}
         onPress={() =>
@@ -94,11 +94,12 @@ export default function PerfilScreen() {
               telefono: perfil.telefono ?? "",
               foto_url: perfil.foto_url ?? "",
             },
-      })
-    }
->
-  <Text style={styles.botonSecundarioTexto}>Editar perfil</Text>
-</Pressable>
+          })
+        }
+      >
+        <Text style={styles.botonSecundarioTexto}>Editar perfil</Text>
+      </Pressable>
+
       {perfil.rol === "cliente" && (
         <Pressable
           style={styles.botonSecundario}
@@ -107,7 +108,7 @@ export default function PerfilScreen() {
           <Text style={styles.botonSecundarioTexto}>Quiero ofrecer mis servicios</Text>
         </Pressable>
       )}
-      
+
       {perfil.rol === "profesional" && (
         <Pressable
           style={styles.botonSecundario}
@@ -116,17 +117,27 @@ export default function PerfilScreen() {
           <Text style={styles.botonSecundarioTexto}>Mis servicios</Text>
         </Pressable>
       )}
+
+      {perfil.rol === "profesional" && (
+        <Pressable
+          style={styles.botonSecundario}
+          onPress={() => router.push("/disponibilidad")}
+        >
+          <Text style={styles.botonSecundarioTexto}>Mi horario</Text>
+        </Pressable>
+      )}
+
       <Pressable
         style={styles.botonSecundario}
-        onPress={() => router.push("/disponibilidad")}
+        onPress={() => router.push("/bookings/historial")}
       >
-        <Text style={styles.botonSecundarioTexto}>Mi horario</Text>
+        <Text style={styles.botonSecundarioTexto}>Historial de servicios</Text>
       </Pressable>
+
       <Pressable style={styles.boton} onPress={confirmarCierreSesion}>
         <Text style={styles.botonTexto}>Cerrar sesión</Text>
       </Pressable>
     </View>
-    
   );
 }
 
@@ -155,8 +166,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     borderRadius: 8,
     marginBottom: 12,
+    alignSelf: "stretch",
   },
-  botonSecundarioTexto: { color: colors.nettleGreen, fontWeight: "600" },
+  botonSecundarioTexto: { color: colors.nettleGreen, fontWeight: "600", textAlign: "center" },
   boton: {
     backgroundColor: colors.sugoDellaNonna,
     paddingVertical: 12,
