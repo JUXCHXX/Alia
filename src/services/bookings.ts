@@ -14,6 +14,12 @@ export interface SolicitudEnviada extends Booking {
 export interface HistorialItem extends Booking {
   profiles: { nombre: string } | null;
   services: { nombre: string; precio: number } | null;
+  reviews: { calificacion: number }[] | null;
+}
+
+export interface HistorialProfesionalItem extends Booking {
+  profiles: { nombre: string } | null;
+  services: { nombre: string; precio: number } | null;
 }
 
 export async function crearSolicitud(datos: {
@@ -42,6 +48,7 @@ export async function getSolicitudesRecibidas(): Promise<SolicitudRecibida[]> {
     .from("bookings")
     .select("*, profiles!bookings_cliente_id_fkey(nombre, telefono), services(nombre)")
     .eq("professional_id", userData.user.id)
+    .in("estado", ["pendiente", "aceptada", "en_progreso"])
     .order("creado_en", { ascending: false });
 
   if (error) throw error;
@@ -69,8 +76,23 @@ export async function getMiHistorial(): Promise<HistorialItem[]> {
 
   const { data, error } = await supabase
     .from("bookings")
-    .select("*, profiles!bookings_professional_id_fkey(nombre), services(nombre, precio)")
+    .select("*, profiles!bookings_professional_id_fkey(nombre), services(nombre, precio), reviews(calificacion)")
     .eq("cliente_id", userData.user.id)
+    .in("estado", ["completada", "cancelada", "rechazada"])
+    .order("actualizado_en", { ascending: false });
+
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function getHistorialProfesional(): Promise<HistorialProfesionalItem[]> {
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) throw new Error("No hay sesión activa.");
+
+  const { data, error } = await supabase
+    .from("bookings")
+    .select("*, profiles!bookings_cliente_id_fkey(nombre), services(nombre, precio)")
+    .eq("professional_id", userData.user.id)
     .in("estado", ["completada", "cancelada", "rechazada"])
     .order("actualizado_en", { ascending: false });
 

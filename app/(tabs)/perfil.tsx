@@ -127,12 +127,23 @@ export default function PerfilScreen() {
         </Pressable>
       )}
 
-      <Pressable
-        style={styles.botonSecundario}
-        onPress={() => router.push("/bookings/historial")}
-      >
-        <Text style={styles.botonSecundarioTexto}>Historial de servicios</Text>
-      </Pressable>
+      {perfil.rol === "cliente" && (
+        <Pressable
+          style={styles.botonSecundario}
+          onPress={() => router.push("/bookings/historial")}
+        >
+          <Text style={styles.botonSecundarioTexto}>Historial de servicios</Text>
+        </Pressable>
+      )}
+
+      {perfil.rol === "profesional" && (
+        <Pressable
+          style={styles.botonSecundario}
+          onPress={() => router.push("/bookings/historial-profesional")}
+        >
+          <Text style={styles.botonSecundarioTexto}>Historial de servicios</Text>
+        </Pressable>
+      )}
 
       <Pressable style={styles.boton} onPress={confirmarCierreSesion}>
         <Text style={styles.botonTexto}>Cerrar sesión</Text>

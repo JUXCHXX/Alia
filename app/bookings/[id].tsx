@@ -12,7 +12,7 @@ import {
   RefreshControl,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useLocalSearchParams, useFocusEffect } from "expo-router";
+import { router, useLocalSearchParams, useFocusEffect } from "expo-router";
 import { supabase } from "../../src/services/supabase";
 import { getMensajes, enviarMensaje } from "../../src/services/messages";
 import { getEstadoBooking } from "../../src/services/bookings";
@@ -105,6 +105,22 @@ export default function ChatScreen() {
         style={styles.container}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
+        <Pressable
+          style={styles.botonReportar}
+          onPress={() =>
+            router.push({
+              pathname: "/bookings/reportar",
+              params: {
+                bookingId: id,
+                reportadoId: mensajes.find((m) => m.remitente_id !== miId)?.remitente_id ?? "",
+                nombreReportado: "este usuario",
+              },
+            })
+          }
+        >
+          <Text style={styles.botonReportarTexto}>⚠️ Reportar</Text>
+        </Pressable>
+
         {estadoBooking === "en_progreso" && (
           <View style={[styles.banner, { backgroundColor: colors.nettleGreen }]}>
             <Text style={styles.bannerTexto}>🔧 Servicio en curso</Text>
@@ -172,6 +188,8 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
   centro: { flex: 1, alignItems: "center", justifyContent: "center" },
   vacio: { textAlign: "center", color: colors.coolClay, marginTop: 40 },
+  botonReportar: { padding: 12, alignItems: "flex-end" },
+  botonReportarTexto: { color: colors.sugoDellaNonna, fontSize: 12, fontWeight: "600" },
   banner: {
     backgroundColor: colors.nettleGreen,
     paddingVertical: 8,

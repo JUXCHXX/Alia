@@ -10,12 +10,16 @@ import { Service } from "../../src/types/service";
 import { colors } from "../../src/constants/colors";
 import { getDisponibilidadDeProfesional } from "../../src/services/availability";
 import { AvailabilityBlock, DIAS_SEMANA } from "../../src/types/availability";
+import { getCalificacionesDeProfesional, ReviewConCliente } from "../../src/services/reviews";
+import { getNivelProfesional, NivelProfesional, NIVEL_INFO } from "../../src/services/reputacion";
 
 export default function PerfilProfesionalScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [perfil, setPerfil] = useState<PerfilProfesionalPublico | null>(null);
   const [servicios, setServicios] = useState<Service[]>([]);
   const [disponibilidad, setDisponibilidad] = useState<AvailabilityBlock[]>([]);
+  const [calificaciones, setCalificaciones] = useState<ReviewConCliente[]>([]);
+  const [nivelInfo, setNivelInfo] = useState<NivelProfesional | null>(null);
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
@@ -23,11 +27,15 @@ export default function PerfilProfesionalScreen() {
       getPerfilProfesionalPublico(id),
       getServiciosDeProfesional(id),
       getDisponibilidadDeProfesional(id),
+      getCalificacionesDeProfesional(id),
+      getNivelProfesional(id),
     ])
-      .then(([perfilData, serviciosData, disponibilidadData]) => {
+      .then(([perfilData, serviciosData, disponibilidadData, calificacionesData, nivelData]) => {
         setPerfil(perfilData);
         setServicios(serviciosData);
         setDisponibilidad(disponibilidadData);
+        setCalificaciones(calificacionesData);
+        setNivelInfo(nivelData);
       })
       .finally(() => setCargando(false));
   }, [id]);
@@ -65,6 +73,20 @@ export default function PerfilProfesionalScreen() {
             </View>
           )}
           <Text style={styles.nombre}>{perfil.nombre}</Text>
+
+          {nivelInfo && (
+            <View style={styles.insignia}>
+              <Text style={styles.insigniaTexto}>
+                {NIVEL_INFO[nivelInfo.nivel].emoji} {NIVEL_INFO[nivelInfo.nivel].nombre}
+              </Text>
+              <Text style={styles.insigniaDetalle}>
+                {nivelInfo.totalServicios} servicio{nivelInfo.totalServicios !== 1 ? "s" : ""} completado{nivelInfo.totalServicios !== 1 ? "s" : ""}
+                {nivelInfo.promedioCalificacion != null &&
+                  ` · ${nivelInfo.promedioCalificacion.toFixed(1)} ★`}
+              </Text>
+            </View>
+          )}
+
           {perfil.zona_trabajo && (
             <Text style={styles.zona}>{perfil.zona_trabajo}</Text>
           )}
@@ -76,6 +98,25 @@ export default function PerfilProfesionalScreen() {
                 <Text key={bloque.id} style={styles.bloqueHorario}>
                   {DIAS_SEMANA[bloque.dia_semana]}: {bloque.hora_inicio.slice(0, 5)} - {bloque.hora_fin.slice(0, 5)}
                 </Text>
+              ))}
+            </View>
+          )}
+          {calificaciones.length > 0 && (
+            <View style={styles.calificacionesContainer}>
+              <Text style={styles.subtitulo}>Calificaciones</Text>
+              {calificaciones.map((review) => (
+                <View key={review.id} style={styles.reviewCard}>
+                  <Text style={styles.reviewEstrellas}>{"★".repeat(review.calificacion)}</Text>
+                  <Text style={styles.reviewCliente}>
+                    {review.bookings?.profiles?.nombre ?? "Cliente"}
+                  </Text>
+                  {review.comentario && (
+                    <Text style={styles.reviewComentario}>{review.comentario}</Text>
+                  )}
+                  {review.foto_url && (
+                    <Image source={{ uri: review.foto_url }} style={styles.reviewFoto} />
+                  )}
+                </View>
               ))}
             </View>
           )}
@@ -133,7 +174,17 @@ const styles = StyleSheet.create({
   },
   fotoIniciales: { color: "white", fontSize: 36, fontWeight: "600" },
   nombre: { fontSize: 22, fontWeight: "600", color: colors.quartzite },
-  zona: { color: colors.coolClay, marginTop: 4 },
+  insignia: {
+    backgroundColor: colors.nettleGreen,
+    borderRadius: 20,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    marginTop: 8,
+    alignItems: "center",
+  },
+  insigniaTexto: { color: "white", fontWeight: "600", fontSize: 14 },
+  insigniaDetalle: { color: "white", fontSize: 11, marginTop: 2, opacity: 0.9 },
+  zona: { color: colors.coolClay, marginTop: 8 },
   bio: { color: colors.quartzite, textAlign: "center", marginTop: 12 },
   subtitulo: { alignSelf: "flex-start", fontSize: 16, fontWeight: "600", color: colors.quartzite, marginTop: 24 },
   vacio: { textAlign: "center", color: colors.coolClay, marginTop: 20 },
@@ -146,6 +197,18 @@ const styles = StyleSheet.create({
   },
   disponibilidadContainer: { alignSelf: "stretch", marginTop: 16 },
   bloqueHorario: { color: colors.quartzite, marginTop: 4 },
+  calificacionesContainer: { alignSelf: "stretch", marginTop: 16 },
+  reviewCard: {
+    borderWidth: 1,
+    borderColor: colors.coolClay,
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 8,
+  },
+  reviewEstrellas: { color: colors.lionfishRed, fontSize: 16 },
+  reviewCliente: { color: colors.quartzite, fontWeight: "600", marginTop: 4 },
+  reviewComentario: { color: colors.quartzite, marginTop: 4 },
+  reviewFoto: { width: 100, height: 100, borderRadius: 8, marginTop: 8 },
   servicioNombre: { fontSize: 16, fontWeight: "600", color: colors.quartzite },
   servicioDescripcion: { color: colors.coolClay, marginTop: 4 },
   precio: { color: colors.nettleGreen, marginTop: 6, fontWeight: "600" },
