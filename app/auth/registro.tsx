@@ -3,6 +3,7 @@ import { View, Text, TextInput, Pressable, StyleSheet, Alert } from "react-nativ
 import { router } from "expo-router";
 import { supabase } from "../../src/services/supabase";
 import { colors } from "../../src/constants/colors";
+import { Fondo } from "../../src/components/Fondo";
 
 export default function RegistroScreen() {
   const [nombre, setNombre] = useState("");
@@ -45,46 +46,55 @@ export default function RegistroScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.titulo}>Crear cuenta</Text>
+    <Fondo source={require("../../assets/images/fondo_login.png")}>
+      <View style={styles.container}>
+        <View style={styles.tarjeta}>
+          <Text style={styles.titulo}>Crear cuenta</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Nombre"
-        placeholderTextColor={colors.coolClay}
-        value={nombre}
-        onChangeText={setNombre}
-        autoCapitalize="words"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Correo electrónico"
-        placeholderTextColor={colors.coolClay}
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Contraseña"
-        placeholderTextColor={colors.coolClay}
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+          <TextInput
+            style={styles.input}
+            placeholder="Nombre"
+            placeholderTextColor={colors.coolClay}
+            value={nombre}
+            onChangeText={setNombre}
+            autoCapitalize="words"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Correo electrónico"
+            placeholderTextColor={colors.coolClay}
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Contraseña"
+            placeholderTextColor={colors.coolClay}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
 
-      <Pressable style={styles.boton} onPress={handleRegistro} disabled={cargando}>
-        <Text style={styles.botonTexto}>
-          {cargando ? "Creando cuenta..." : "Registrarme"}
-        </Text>
-      </Pressable>
-    </View>
+          <Pressable style={styles.boton} onPress={handleRegistro} disabled={cargando}>
+            <Text style={styles.botonTexto}>
+              {cargando ? "Creando cuenta..." : "Registrarme"}
+            </Text>
+          </Pressable>
+        </View>
+      </View>
+    </Fondo>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", padding: 24, backgroundColor: "#fff" },
+  container: { flex: 1, justifyContent: "center", padding: 24 },
+  tarjeta: {
+    backgroundColor: "rgba(255,255,255,0.92)",
+    borderRadius: 16,
+    padding: 24,
+  },
   titulo: { fontSize: 24, fontWeight: "600", marginBottom: 24, textAlign: "center", color: colors.quartzite },
   input: {
     borderWidth: 1,
@@ -93,6 +103,7 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 12,
     color: colors.quartzite,
+    backgroundColor: "white",
   },
   boton: {
     backgroundColor: colors.lionfishRed,
@@ -101,5 +112,4 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   botonTexto: { color: "white", textAlign: "center", fontWeight: "600" },
-  link: { textAlign: "center", marginTop: 16, color: colors.nettleGreen },
 });

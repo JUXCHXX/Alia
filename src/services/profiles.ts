@@ -10,7 +10,7 @@ export async function getMiPerfil(): Promise<Profile | null> {
 
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, nombre, rol, ciudad, telefono, foto_url, creado_en")
+    .select("id, nombre, rol, ciudad, telefono, foto_url, suspendido, motivo_suspension, creado_en")
     .eq("id", userData.user.id)
     .single();
 
@@ -19,21 +19,4 @@ export async function getMiPerfil(): Promise<Profile | null> {
   }
 
   return data;
-}
-
-export async function actualizarMiPerfil(cambios: {
-  nombre?: string;
-  ciudad?: string;
-  telefono?: string;
-  foto_url?: string;
-}) {
-  const { data: userData } = await supabase.auth.getUser();
-  if (!userData.user) throw new Error("No hay sesión activa.");
-
-  const { error } = await supabase
-    .from("profiles")
-    .update(cambios)
-    .eq("id", userData.user.id);
-
-  if (error) throw error;
 }

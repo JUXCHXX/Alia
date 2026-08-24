@@ -160,3 +160,13 @@ export async function getEstadoBooking(id: string): Promise<string | null> {
   if (error) throw error;
   return data?.estado ?? null;
 }
+export async function crearPago(bookingId: string): Promise<string> {
+  const { data, error } = await supabase.functions.invoke("crear-pago", {
+    body: { bookingId },
+  });
+
+  if (error) throw error;
+  if (data.error) throw new Error(data.error);
+
+  return data.url;
+}

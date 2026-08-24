@@ -5,5 +5,7 @@ export interface Profile {
   ciudad: string | null;
   telefono: string | null;
   foto_url: string | null;
+  suspendido: boolean;
+  motivo_suspension: string | null;
   creado_en: string;
 }

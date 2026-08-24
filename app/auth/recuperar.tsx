@@ -3,6 +3,7 @@ import { View, Text, TextInput, Pressable, StyleSheet, Alert } from "react-nativ
 import { router } from "expo-router";
 import { supabase } from "../../src/services/supabase";
 import { colors } from "../../src/constants/colors";
+import { Fondo } from "../../src/components/Fondo";
 
 export default function RecuperarScreen() {
   const [email, setEmail] = useState("");
@@ -13,20 +14,15 @@ export default function RecuperarScreen() {
       Alert.alert("Falta el correo", "Ingresa tu correo electrónico.");
       return;
     }
-
     setCargando(true);
-
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
       redirectTo: "aliamobile://auth/nueva-contrasena",
     });
-
     setCargando(false);
-
     if (error) {
       Alert.alert("Error", error.message);
       return;
     }
-
     Alert.alert(
       "Revisa tu correo",
       "Te enviamos un enlace para restablecer tu contraseña."
@@ -35,30 +31,37 @@ export default function RecuperarScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.titulo}>Recuperar contraseña</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Correo electrónico"
-        placeholderTextColor={colors.coolClay}
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-      />
-
-      <Pressable style={styles.boton} onPress={handleRecuperar} disabled={cargando}>
-        <Text style={styles.botonTexto}>
-          {cargando ? "Enviando..." : "Enviar enlace"}
-        </Text>
-      </Pressable>
-    </View>
+    <Fondo source={require("../../assets/images/fondo_login.png")}>
+      <View style={styles.container}>
+        <View style={styles.tarjeta}>
+          <Text style={styles.titulo}>Recuperar contraseña</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Correo electrónico"
+            placeholderTextColor={colors.coolClay}
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+          <Pressable style={styles.boton} onPress={handleRecuperar} disabled={cargando}>
+            <Text style={styles.botonTexto}>
+              {cargando ? "Enviando..." : "Enviar enlace"}
+            </Text>
+          </Pressable>
+        </View>
+      </View>
+    </Fondo>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", padding: 24, backgroundColor: "#fff" },
+  container: { flex: 1, justifyContent: "center", padding: 24 },
+  tarjeta: {
+    backgroundColor: "rgba(255,255,255,0.92)",
+    borderRadius: 16,
+    padding: 24,
+  },
   titulo: { fontSize: 24, fontWeight: "600", marginBottom: 24, textAlign: "center", color: colors.quartzite },
   input: {
     borderWidth: 1,
@@ -67,6 +70,7 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 12,
     color: colors.quartzite,
+    backgroundColor: "white",
   },
   boton: {
     backgroundColor: colors.lionfishRed,

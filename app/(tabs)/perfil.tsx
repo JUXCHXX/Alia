@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { View, Text, Pressable, StyleSheet, Alert, ActivityIndicator, Image } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback } from "react";
@@ -6,6 +6,7 @@ import { supabase } from "../../src/services/supabase";
 import { getMiPerfil } from "../../src/services/profiles";
 import { Profile } from "../../src/types/profile";
 import { colors } from "../../src/constants/colors";
+import { Fondo } from "../../src/components/Fondo";
 
 export default function PerfilScreen() {
   const [perfil, setPerfil] = useState<Profile | null>(null);
@@ -47,113 +48,128 @@ export default function PerfilScreen() {
 
   if (cargando) {
     return (
-      <View style={styles.container}>
-        <ActivityIndicator color={colors.lionfishRed} />
-      </View>
+      <Fondo source={require("../../assets/images/fondo_app.png")}>
+        <View style={styles.container}>
+          <ActivityIndicator color={colors.lionfishRed} />
+        </View>
+      </Fondo>
     );
   }
 
   if (error || !perfil) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.error}>{error ?? "Perfil no encontrado."}</Text>
-      </View>
+      <Fondo source={require("../../assets/images/fondo_app.png")}>
+        <View style={styles.container}>
+          <Text style={styles.errorTexto}>{error ?? "Perfil no encontrado."}</Text>
+        </View>
+      </Fondo>
     );
   }
 
   return (
-    <View style={styles.container}>
-      {perfil.foto_url ? (
-        <Image source={{ uri: perfil.foto_url }} style={styles.foto} />
-      ) : (
-        <View style={styles.fotoPlaceholder}>
-          <Text style={styles.fotoIniciales}>
-            {perfil.nombre.charAt(0).toUpperCase()}
+    <Fondo source={require("../../assets/images/fondo_app.png")}>
+      <View style={styles.container}>
+        <View style={styles.tarjeta}>
+          {perfil.foto_url ? (
+            <Image source={{ uri: perfil.foto_url }} style={styles.foto} />
+          ) : (
+            <View style={styles.fotoPlaceholder}>
+              <Text style={styles.fotoIniciales}>
+                {perfil.nombre.charAt(0).toUpperCase()}
+              </Text>
+            </View>
+          )}
+
+          <Text style={styles.nombre}>{perfil.nombre}</Text>
+          <Text style={styles.rol}>
+            {perfil.rol === "cliente" ? "Cliente" : "Profesional"}
           </Text>
+
+          <View style={styles.datos}>
+            <Text style={styles.dato}>Ciudad: {perfil.ciudad ?? "No especificada"}</Text>
+            <Text style={styles.dato}>Teléfono: {perfil.telefono ?? "No especificado"}</Text>
+          </View>
+
+          <Pressable
+            style={styles.botonSecundario}
+            onPress={() =>
+              router.push({
+                pathname: "/perfil/editar",
+                params: {
+                  nombre: perfil.nombre,
+                  ciudad: perfil.ciudad ?? "",
+                  telefono: perfil.telefono ?? "",
+                  foto_url: perfil.foto_url ?? "",
+                },
+              })
+            }
+          >
+            <Text style={styles.botonSecundarioTexto}>Editar perfil</Text>
+          </Pressable>
+
+          {perfil.rol === "cliente" && (
+            <Pressable
+              style={styles.botonSecundario}
+              onPress={() => router.push("/perfil/hacerme-profesional")}
+            >
+              <Text style={styles.botonSecundarioTexto}>Quiero ofrecer mis servicios</Text>
+            </Pressable>
+          )}
+
+          {perfil.rol === "profesional" && (
+            <Pressable
+              style={styles.botonSecundario}
+              onPress={() => router.push("/servicios")}
+            >
+              <Text style={styles.botonSecundarioTexto}>Mis servicios</Text>
+            </Pressable>
+          )}
+
+          {perfil.rol === "profesional" && (
+            <Pressable
+              style={styles.botonSecundario}
+              onPress={() => router.push("/disponibilidad")}
+            >
+              <Text style={styles.botonSecundarioTexto}>Mi horario</Text>
+            </Pressable>
+          )}
+
+          {perfil.rol === "cliente" && (
+            <Pressable
+              style={styles.botonSecundario}
+              onPress={() => router.push("/bookings/historial")}
+            >
+              <Text style={styles.botonSecundarioTexto}>Historial de servicios</Text>
+            </Pressable>
+          )}
+
+          {perfil.rol === "profesional" && (
+            <Pressable
+              style={styles.botonSecundario}
+              onPress={() => router.push("/bookings/historial-profesional")}
+            >
+              <Text style={styles.botonSecundarioTexto}>Historial de servicios</Text>
+            </Pressable>
+          )}
+
+          <Pressable style={styles.boton} onPress={confirmarCierreSesion}>
+            <Text style={styles.botonTexto}>Cerrar sesión</Text>
+          </Pressable>
         </View>
-      )}
-
-      <Text style={styles.nombre}>{perfil.nombre}</Text>
-      <Text style={styles.rol}>
-        {perfil.rol === "cliente" ? "Cliente" : "Profesional"}
-      </Text>
-
-      <View style={styles.datos}>
-        <Text style={styles.dato}>Ciudad: {perfil.ciudad ?? "No especificada"}</Text>
-        <Text style={styles.dato}>Teléfono: {perfil.telefono ?? "No especificado"}</Text>
       </View>
-
-      <Pressable
-        style={styles.botonSecundario}
-        onPress={() =>
-          router.push({
-            pathname: "/perfil/editar",
-            params: {
-              nombre: perfil.nombre,
-              ciudad: perfil.ciudad ?? "",
-              telefono: perfil.telefono ?? "",
-              foto_url: perfil.foto_url ?? "",
-            },
-          })
-        }
-      >
-        <Text style={styles.botonSecundarioTexto}>Editar perfil</Text>
-      </Pressable>
-
-      {perfil.rol === "cliente" && (
-        <Pressable
-          style={styles.botonSecundario}
-          onPress={() => router.push("/perfil/hacerme-profesional")}
-        >
-          <Text style={styles.botonSecundarioTexto}>Quiero ofrecer mis servicios</Text>
-        </Pressable>
-      )}
-
-      {perfil.rol === "profesional" && (
-        <Pressable
-          style={styles.botonSecundario}
-          onPress={() => router.push("/servicios")}
-        >
-          <Text style={styles.botonSecundarioTexto}>Mis servicios</Text>
-        </Pressable>
-      )}
-
-      {perfil.rol === "profesional" && (
-        <Pressable
-          style={styles.botonSecundario}
-          onPress={() => router.push("/disponibilidad")}
-        >
-          <Text style={styles.botonSecundarioTexto}>Mi horario</Text>
-        </Pressable>
-      )}
-
-      {perfil.rol === "cliente" && (
-        <Pressable
-          style={styles.botonSecundario}
-          onPress={() => router.push("/bookings/historial")}
-        >
-          <Text style={styles.botonSecundarioTexto}>Historial de servicios</Text>
-        </Pressable>
-      )}
-
-      {perfil.rol === "profesional" && (
-        <Pressable
-          style={styles.botonSecundario}
-          onPress={() => router.push("/bookings/historial-profesional")}
-        >
-          <Text style={styles.botonSecundarioTexto}>Historial de servicios</Text>
-        </Pressable>
-      )}
-
-      <Pressable style={styles.boton} onPress={confirmarCierreSesion}>
-        <Text style={styles.botonTexto}>Cerrar sesión</Text>
-      </Pressable>
-    </View>
+    </Fondo>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24, backgroundColor: "#fff" },
+  container: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24 },
+  tarjeta: {
+    backgroundColor: "rgba(255,255,255,0.92)",
+    borderRadius: 16,
+    padding: 24,
+    alignItems: "center",
+    width: "100%",
+  },
   foto: { width: 96, height: 96, borderRadius: 48, marginBottom: 16 },
   fotoPlaceholder: {
     width: 96,
@@ -169,7 +185,7 @@ const styles = StyleSheet.create({
   rol: { fontSize: 14, color: colors.coolClay, marginBottom: 20, textTransform: "uppercase" },
   datos: { alignSelf: "stretch", marginBottom: 24 },
   dato: { fontSize: 16, color: colors.quartzite, marginBottom: 8 },
-  error: { color: colors.sugoDellaNonna },
+  errorTexto: { color: colors.sugoDellaNonna, backgroundColor: "white", padding: 12, borderRadius: 8 },
   botonSecundario: {
     borderWidth: 1,
     borderColor: colors.nettleGreen,
@@ -185,6 +201,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
+    alignSelf: "stretch",
   },
-  botonTexto: { color: "white", fontWeight: "600" },
+  botonTexto: { color: "white", fontWeight: "600", textAlign: "center" },
 });

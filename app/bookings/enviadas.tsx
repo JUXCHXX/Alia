@@ -7,6 +7,8 @@ import {
   SolicitudEnviada,
 } from "../../src/services/bookings";
 import { colors } from "../../src/constants/colors";
+import * as WebBrowser from "expo-web-browser";
+import { crearPago } from "../../src/services/bookings";
 
 const ETIQUETA_ESTADO: Record<string, string> = {
   pendiente: "Pendiente",
@@ -32,6 +34,16 @@ export default function MisSolicitudesEnviadasScreen() {
       cargarSolicitudes();
     }, [cargarSolicitudes])
   );
+  
+  async function handlePagar(bookingId: string) {
+    try {
+      const url = await crearPago(bookingId);
+      await WebBrowser.openBrowserAsync(url);
+      cargarSolicitudes();
+    } catch (err: any) {
+      Alert.alert("Error", err.message ?? "No se pudo iniciar el pago.");
+    }
+  }
 
   function confirmarCancelar(id: string) {
     Alert.alert(
@@ -82,6 +94,15 @@ export default function MisSolicitudesEnviadasScreen() {
             </Text>
             <Text style={styles.estado}>{ETIQUETA_ESTADO[item.estado]}</Text>
 
+            {item.estado === "aceptada" && (
+              <Pressable
+                style={styles.botonPagar}
+                onPress={() => handlePagar(item.id)}
+              >
+                <Text style={styles.botonPagarTexto}>Pagar servicio</Text>
+              </Pressable>
+            )}
+             
             {(item.estado === "pendiente" || item.estado === "aceptada" || item.estado === "en_progreso") && (
               <Pressable
                 style={styles.botonCancelar}
@@ -134,4 +155,11 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   botonChatTexto: { color: colors.nettleGreen, textAlign: "center", fontWeight: "600" },
+  botonPagar: {
+  backgroundColor: colors.lionfishRed,
+  paddingVertical: 10,
+  borderRadius: 6,
+  marginTop: 10,
+},
+botonPagarTexto: { color: "white", textAlign: "center", fontWeight: "600" },
 });

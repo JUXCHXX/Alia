@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Stack, useRouter, useSegments } from "expo-router";
-import { View, ActivityIndicator } from "react-native";
+import { View, ActivityIndicator, Alert } from "react-native";
 import { Session } from "@supabase/supabase-js";
 import { supabase } from "../src/services/supabase";
+import { getMiPerfil } from "../src/services/profiles";
 import { colors } from "../src/constants/colors";
 
 export default function RootLayout() {
@@ -12,16 +13,16 @@ export default function RootLayout() {
   const segments = useSegments();
 
   useEffect(() => {
-  supabase.auth.getSession()
-    .then(({ data }) => {
-      setSession(data.session);
-    })
-    .catch(() => {
-      setSession(null);
-    })
-    .finally(() => {
-      setCargando(false);
-    });
+    supabase.auth.getSession()
+      .then(({ data }) => {
+        setSession(data.session);
+      })
+      .catch(() => {
+        setSession(null);
+      })
+      .finally(() => {
+        setCargando(false);
+      });
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession);
@@ -29,6 +30,20 @@ export default function RootLayout() {
 
     return () => listener.subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!session) return;
+
+    getMiPerfil().then((perfil) => {
+      if (perfil?.suspendido) {
+        Alert.alert(
+          "Cuenta suspendida",
+          perfil.motivo_suspension || "Tu cuenta ha sido suspendida. Contacta soporte para más información."
+        );
+        supabase.auth.signOut();
+      }
+    });
+  }, [session]);
 
   useEffect(() => {
     if (cargando) return;

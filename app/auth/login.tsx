@@ -3,6 +3,7 @@ import { View, Text, TextInput, Pressable, StyleSheet, Alert } from "react-nativ
 import { router } from "expo-router";
 import { supabase } from "../../src/services/supabase";
 import { colors } from "../../src/constants/colors";
+import { Fondo } from "../../src/components/Fondo";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -42,46 +43,55 @@ export default function LoginScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.titulo}>Iniciar sesión</Text>
+    <Fondo source={require("../../assets/images/fondo_login.png")}>
+      <View style={styles.container}>
+        <View style={styles.tarjeta}>
+          <Text style={styles.titulo}>Iniciar sesión</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Correo electrónico"
-        placeholderTextColor={colors.coolClay}
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Contraseña"
-        placeholderTextColor={colors.coolClay}
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+          <TextInput
+            style={styles.input}
+            placeholder="Correo electrónico"
+            placeholderTextColor={colors.coolClay}
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Contraseña"
+            placeholderTextColor={colors.coolClay}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
 
-      <Pressable style={styles.boton} onPress={handleLogin} disabled={cargando}>
-        <Text style={styles.botonTexto}>
-          {cargando ? "Ingresando..." : "Ingresar"}
-        </Text>
-      </Pressable>
+          <Pressable style={styles.boton} onPress={handleLogin} disabled={cargando}>
+            <Text style={styles.botonTexto}>
+              {cargando ? "Ingresando..." : "Ingresar"}
+            </Text>
+          </Pressable>
 
-      <Pressable onPress={() => router.push("/auth/registro")}>
-        <Text style={styles.link}>¿No tienes cuenta? Regístrate</Text>
-      </Pressable>
+          <Pressable onPress={() => router.push("/auth/registro")}>
+            <Text style={styles.link}>¿No tienes cuenta? Regístrate</Text>
+          </Pressable>
 
-      <Pressable onPress={() => router.push("/auth/recuperar")}>
-        <Text style={styles.link}>¿Olvidaste tu contraseña?</Text>
-      </Pressable>
-    </View>
+          <Pressable onPress={() => router.push("/auth/recuperar")}>
+            <Text style={styles.link}>¿Olvidaste tu contraseña?</Text>
+          </Pressable>
+        </View>
+      </View>
+    </Fondo>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", padding: 24, backgroundColor: "#fff" },
+  container: { flex: 1, justifyContent: "center", padding: 24 },
+  tarjeta: {
+    backgroundColor: "rgba(255,255,255,0.92)",
+    borderRadius: 16,
+    padding: 24,
+  },
   titulo: { fontSize: 24, fontWeight: "600", marginBottom: 24, textAlign: "center", color: colors.quartzite },
   input: {
     borderWidth: 1,
@@ -90,6 +100,7 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 12,
     color: colors.quartzite,
+    backgroundColor: "white",
   },
   boton: {
     backgroundColor: colors.lionfishRed,

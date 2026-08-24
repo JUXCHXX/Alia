@@ -5,6 +5,7 @@ import * as Linking from "expo-linking";
 import * as QueryParams from "expo-auth-session/build/QueryParams";
 import { supabase } from "../../src/services/supabase";
 import { colors } from "../../src/constants/colors";
+import { Fondo } from "../../src/components/Fondo";
 
 export default function NuevaContrasenaScreen() {
   const url = Linking.useURL();
@@ -55,38 +56,43 @@ export default function NuevaContrasenaScreen() {
     router.replace("/(tabs)");
   }
 
-  if (!sesionLista) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.titulo}>Verificando enlace...</Text>
-      </View>
-    );
-  }
-
   return (
-    <View style={styles.container}>
-      <Text style={styles.titulo}>Nueva contraseña</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Nueva contraseña"
-        placeholderTextColor={colors.coolClay}
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-
-      <Pressable style={styles.boton} onPress={handleGuardar} disabled={cargando}>
-        <Text style={styles.botonTexto}>
-          {cargando ? "Guardando..." : "Guardar contraseña"}
-        </Text>
-      </Pressable>
-    </View>
+    <Fondo source={require("../../assets/images/fondo_login.png")}>
+      <View style={styles.container}>
+        <View style={styles.tarjeta}>
+          {!sesionLista ? (
+            <Text style={styles.titulo}>Verificando enlace...</Text>
+          ) : (
+            <>
+              <Text style={styles.titulo}>Nueva contraseña</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Nueva contraseña"
+                placeholderTextColor={colors.coolClay}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+              />
+              <Pressable style={styles.boton} onPress={handleGuardar} disabled={cargando}>
+                <Text style={styles.botonTexto}>
+                  {cargando ? "Guardando..." : "Guardar contraseña"}
+                </Text>
+              </Pressable>
+            </>
+          )}
+        </View>
+      </View>
+    </Fondo>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", padding: 24, backgroundColor: "#fff" },
+  container: { flex: 1, justifyContent: "center", padding: 24 },
+  tarjeta: {
+    backgroundColor: "rgba(255,255,255,0.92)",
+    borderRadius: 16,
+    padding: 24,
+  },
   titulo: { fontSize: 24, fontWeight: "600", marginBottom: 24, textAlign: "center", color: colors.quartzite },
   input: {
     borderWidth: 1,
@@ -95,6 +101,7 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 12,
     color: colors.quartzite,
+    backgroundColor: "white",
   },
   boton: {
     backgroundColor: colors.lionfishRed,
