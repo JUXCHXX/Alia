@@ -27,6 +27,10 @@ async function calcularChecksum(propiedades: string[], data: any, timestamp: num
 }
 
 Deno.serve(async (req) => {
+  if (req.method !== "POST") {
+    return new Response(JSON.stringify({ ok: true, info: "No es un evento" }), { status: 200 });
+  }
+
   const evento = await req.json();
 
   const checksumCalculado = await calcularChecksum(
@@ -49,10 +53,13 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    await supabaseAdmin
+    const { data, error } = await supabaseAdmin
       .from("transactions")
       .update({ estado: nuevoEstado })
-      .eq("wompi_reference", tx.payment_link_id);
+      .eq("wompi_reference", tx.payment_link_id)
+      .select();
+
+  } else {
   }
 
   return new Response(JSON.stringify({ recibido: true }), {

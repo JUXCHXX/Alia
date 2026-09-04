@@ -24,11 +24,22 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Solo se puede pagar una solicitud aceptada." }), { status: 400 });
     }
 
-    const montoTotal = booking.services.precio;
+    const { data: transaccionExistente } = await supabase
+      .from("transactions")
+      .select("id")
+      .eq("booking_id", bookingId)
+      .eq("estado", "aprobado")
+      .maybeSingle();
+
+    if (transaccionExistente) {
+      return new Response(JSON.stringify({ error: "Este servicio ya fue pagado." }), { status: 400 });
+    }
+
+    const precioServicio = booking.services.precio;
 
     const { data: transaccion, error: errorInsert } = await supabase
       .from("transactions")
-      .insert({ booking_id: bookingId, monto_total: montoTotal })
+      .insert({ booking_id: bookingId, precio_servicio: precioServicio })
       .select()
       .single();
 
@@ -36,7 +47,7 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: errorInsert.message }), { status: 400 });
     }
 
-    const wompiRes = await fetch("https://production.wompi.co/v1/payment_links", {
+    const wompiRes = await fetch("https://sandbox.wompi.co/v1/payment_links", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -44,11 +55,11 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         name: `Servicio Alía: ${booking.services.nombre}`,
-        description: `Pago del servicio "${booking.services.nombre}" en Alía`,
+        description: `Pago del servicio "${booking.services.nombre}" en Alía (incluye comisión y costo de procesamiento)`,
         single_use: true,
         collect_shipping: false,
         currency: "COP",
-        amount_in_cents: Math.round(montoTotal * 100),
+        amount_in_cents: Math.round(transaccion.monto_total * 100),
       }),
     });
 
@@ -61,10 +72,19 @@ Deno.serve(async (req) => {
     const linkId = wompiData.data.id;
     const urlPago = `https://checkout.wompi.co/l/${linkId}`;
 
-    await supabase
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+
+    const { error: errorUpdate } = await supabaseAdmin
       .from("transactions")
       .update({ wompi_reference: linkId })
       .eq("id", transaccion.id);
+
+    if (errorUpdate) {
+      return new Response(JSON.stringify({ error: "No se pudo guardar la referencia de pago." }), { status: 500 });
+    }
 
     return new Response(JSON.stringify({ url: urlPago }), {
       headers: { "Content-Type": "application/json" },

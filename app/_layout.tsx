@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Stack, useRouter, useSegments } from "expo-router";
+import { useRouter, useSegments } from "expo-router";
+import { Stack } from "expo-router/stack";
 import { View, ActivityIndicator, Alert } from "react-native";
 import { Session } from "@supabase/supabase-js";
 import { supabase } from "../src/services/supabase";

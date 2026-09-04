@@ -90,6 +90,15 @@ export default function PerfilScreen() {
             <Text style={styles.dato}>Teléfono: {perfil.telefono ?? "No especificado"}</Text>
           </View>
 
+          {perfil.es_admin && (
+            <Pressable
+              style={styles.botonAdmin}
+              onPress={() => router.push("/admin")}
+            >
+              <Text style={styles.botonAdminTexto}>Panel de administración</Text>
+            </Pressable>
+          )}
+
           <Pressable
             style={styles.botonSecundario}
             onPress={() =>
@@ -131,6 +140,24 @@ export default function PerfilScreen() {
               onPress={() => router.push("/disponibilidad")}
             >
               <Text style={styles.botonSecundarioTexto}>Mi horario</Text>
+            </Pressable>
+          )}
+
+          {perfil.rol === "profesional" && (
+            <Pressable
+              style={styles.botonSecundario}
+              onPress={() => router.push("/perfil/datos-bancarios")}
+            >
+              <Text style={styles.botonSecundarioTexto}>Datos bancarios</Text>
+            </Pressable>
+          )}
+
+          {perfil.rol === "profesional" && (
+            <Pressable
+              style={styles.botonSecundario}
+              onPress={() => router.push("/perfil/ganancias")}
+            >
+              <Text style={styles.botonSecundarioTexto}>Mis ganancias</Text>
             </Pressable>
           )}
 
@@ -196,6 +223,15 @@ const styles = StyleSheet.create({
     alignSelf: "stretch",
   },
   botonSecundarioTexto: { color: colors.nettleGreen, fontWeight: "600", textAlign: "center" },
+  botonAdmin: {
+    backgroundColor: colors.quartzite,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    marginBottom: 16,
+    alignSelf: "stretch",
+  },
+  botonAdminTexto: { color: "white", fontWeight: "600", textAlign: "center" },
   boton: {
     backgroundColor: colors.sugoDellaNonna,
     paddingVertical: 12,

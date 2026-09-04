@@ -22,6 +22,21 @@ export interface HistorialProfesionalItem extends Booking {
   services: { nombre: string; precio: number } | null;
 }
 
+export interface MovimientoFinanciero {
+  id: string;
+  estado: string;
+  precio_servicio: number;
+  monto_profesional: number;
+  profesional_pagado: boolean;
+  profesional_pagado_en: string | null;
+  creado_en: string;
+  bookings: {
+    professional_id: string;
+    services: { nombre: string } | null;
+    profiles: { nombre: string } | null;
+  } | null;
+}
+
 export async function crearSolicitud(datos: {
   serviceId: string;
   professionalId: string;
@@ -100,6 +115,23 @@ export async function getHistorialProfesional(): Promise<HistorialProfesionalIte
   return data ?? [];
 }
 
+export async function getMisGanancias(): Promise<MovimientoFinanciero[]> {
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) throw new Error("No hay sesión activa.");
+
+  const { data, error } = await supabase
+    .from("transactions")
+    .select(
+      "id, estado, precio_servicio, monto_profesional, profesional_pagado, profesional_pagado_en, creado_en, bookings!inner(professional_id, services(nombre), profiles!bookings_cliente_id_fkey(nombre))"
+    )
+    .eq("bookings.professional_id", userData.user.id)
+    .eq("estado", "aprobado")
+    .order("creado_en", { ascending: false });
+
+  if (error) throw error;
+  return (data ?? []) as unknown as MovimientoFinanciero[];
+}
+
 export async function aceptarSolicitud(id: string) {
   const { error } = await supabase
     .from("bookings")
@@ -165,8 +197,25 @@ export async function crearPago(bookingId: string): Promise<string> {
     body: { bookingId },
   });
 
-  if (error) throw error;
-  if (data.error) throw new Error(data.error);
+  if (error) {
+    let mensaje = error.message;
+    try {
+      const cuerpo = await error.context.json();
+      mensaje = cuerpo.error ?? mensaje;
+      if (cuerpo.detalle) {
+        mensaje += "\n\n" + JSON.stringify(cuerpo.detalle);
+      }
+    } catch {
+      // si no se puede leer el cuerpo, nos quedamos con el mensaje genérico
+    }
+    throw new Error(mensaje);
+  }
+
+  if (data?.error) {
+    let mensaje = data.error;
+    if (data.detalle) mensaje += "\n\n" + JSON.stringify(data.detalle);
+    throw new Error(mensaje);
+  }
 
   return data.url;
 }

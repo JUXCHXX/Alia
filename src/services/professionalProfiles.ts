@@ -95,3 +95,38 @@ export async function getProfesionales(): Promise<ProfesionalResumen[]> {
     };
   });
 }
+export async function getMisDatosBancarios() {
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) throw new Error("No hay sesión activa.");
+
+  const { data, error } = await supabase
+    .from("professional_profiles")
+    .select("banco, tipo_cuenta, numero_cuenta, titular_cuenta")
+    .eq("id", userData.user.id)
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function actualizarDatosBancarios(datos: {
+  banco: string;
+  tipoCuenta: "ahorros" | "corriente";
+  numeroCuenta: string;
+  titularCuenta: string;
+}) {
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) throw new Error("No hay sesión activa.");
+
+  const { error } = await supabase
+    .from("professional_profiles")
+    .update({
+      banco: datos.banco,
+      tipo_cuenta: datos.tipoCuenta,
+      numero_cuenta: datos.numeroCuenta,
+      titular_cuenta: datos.titularCuenta,
+    })
+    .eq("id", userData.user.id);
+
+  if (error) throw error;
+}

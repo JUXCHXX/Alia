@@ -7,7 +7,6 @@ import {
   SolicitudEnviada,
 } from "../../src/services/bookings";
 import { colors } from "../../src/constants/colors";
-import * as WebBrowser from "expo-web-browser";
 import { crearPago } from "../../src/services/bookings";
 
 const ETIQUETA_ESTADO: Record<string, string> = {
@@ -38,8 +37,7 @@ export default function MisSolicitudesEnviadasScreen() {
   async function handlePagar(bookingId: string) {
     try {
       const url = await crearPago(bookingId);
-      await WebBrowser.openBrowserAsync(url);
-      cargarSolicitudes();
+      router.push({ pathname: "/bookings/pagar", params: { url } });
     } catch (err: any) {
       Alert.alert("Error", err.message ?? "No se pudo iniciar el pago.");
     }

@@ -10,7 +10,7 @@ export async function getMiPerfil(): Promise<Profile | null> {
 
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, nombre, rol, ciudad, telefono, foto_url, suspendido, motivo_suspension, creado_en")
+    .select("id, nombre, rol, ciudad, telefono, foto_url, suspendido, motivo_suspension, es_admin, creado_en")
     .eq("id", userData.user.id)
     .single();
 
